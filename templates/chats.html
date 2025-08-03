@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Chatler - Eğitim Asistanı{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h2">
+                    <i class="fas fa-comments me-2"></i>Chatlerim
+                </h1>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newChatModal">
+                    <i class="fas fa-plus me-2"></i>Yeni Chat
+                </button>
+            </div>
+
+            {% if chat_sessions %}
+                <div class="row">
+                    {% for chat in chat_sessions %}
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-comment me-2"></i>{{ chat.session_name }}
+                                    </h5>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <a class="dropdown-item" href="/chat/{{ chat.id }}">
+                                                    <i class="fas fa-edit me-2"></i>Düzenle
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <button class="dropdown-item text-danger" onclick="deleteChat({{ chat.id }})">
+                                                    <i class="fas fa-trash me-2"></i>Sil
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <p class="card-text text-muted small">
+                                    <i class="fas fa-clock me-1"></i>
+                                    Son aktivite: {{ chat.last_activity.strftime('%d.%m.%Y %H:%M') if chat.last_activity else 'Bilinmiyor' }}
+                                </p>
+                                
+                                <p class="card-text text-muted small">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    Oluşturulma: {{ chat.created_at.strftime('%d.%m.%Y') if chat.created_at else 'Bilinmiyor' }}
+                                </p>
+                                
+                                <a href="/chat/{{ chat.id }}" class="btn btn-outline-primary btn-sm w-100">
+                                    <i class="fas fa-arrow-right me-2"></i>Chat'e Git
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">Henüz chat oluşturmadınız</h4>
+                    <p class="text-muted">İlk chat'inizi oluşturmak için "Yeni Chat" butonuna tıklayın.</p>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newChatModal">
+                        <i class="fas fa-plus me-2"></i>İlk Chat'i Oluştur
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Yeni Chat Modal -->
+<div class="modal fade" id="newChatModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus me-2"></i>Yeni Chat Oluştur
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="newChatForm">
+                    <div class="mb-3">
+                        <label for="sessionName" class="form-label">Chat Adı</label>
+                        <input type="text" class="form-control" id="sessionName" 
+                               placeholder="Örn: Matematik Dersi, İngilizce Çalışma" required>
+                        <div class="form-text">Chat'inizi tanımlayıcı bir isimle adlandırın.</div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-primary" onclick="createNewChat()">
+                    <i class="fas fa-plus me-2"></i>Oluştur
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function createNewChat() {
+    const sessionName = document.getElementById('sessionName').value.trim();
+    
+    if (!sessionName) {
+        alert('Lütfen chat adı girin!');
+        return;
+    }
+    
+    fetch('/new-chat', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            session_name: sessionName
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            window.location.href = '/chat';
+        } else {
+            alert('Hata: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Bir hata oluştu: ' + error);
+    });
+}
+
+function deleteChat(sessionId) {
+    if (confirm('Bu chat\'i silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.')) {
+        fetch(`/delete-chat/${sessionId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Hata: ' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('Bir hata oluştu: ' + error);
+        });
+    }
+}
+</script>
+{% endblock %} 

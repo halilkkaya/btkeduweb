@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Plan Seçenekleri - Eğitim Asistanı{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-5">
+                <h1 class="display-4 fw-bold text-primary">Plan Seçenekleri</h1>
+                <p class="lead text-muted">Size en uygun planı seçin</p>
+            </div>
+
+            <div class="row">
+                <!-- Free Plan -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <div class="text-center mb-4">
+                                <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                                    <i class="fas fa-user fa-2x text-muted"></i>
+                                </div>
+                                <h3 class="fw-bold">Free Plan</h3>
+                                <div class="display-6 fw-bold text-primary mb-2">₺0</div>
+                                <p class="text-muted">Aylık</p>
+                            </div>
+
+                            <ul class="list-unstyled mb-4">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Gemini 1.5 Pro modeli
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Temel dosya işleme
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Chat geçmişi
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    PDF, ses, video analizi
+                                </li>
+                                <li class="mb-2 text-muted">
+                                    <i class="fas fa-times text-danger me-2"></i>
+                                    Gelişmiş özellikler
+                                </li>
+                            </ul>
+
+                            <div class="text-center">
+                                {% if plan_type == 'free' %}
+                                    <button class="btn btn-outline-primary" disabled>
+                                        <i class="fas fa-check me-2"></i>Mevcut Plan
+                                    </button>
+                                {% else %}
+                                    <a href="/chat" class="btn btn-outline-primary">
+                                        <i class="fas fa-arrow-left me-2"></i>Chat'e Dön
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pro Plan -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100 border-0 shadow-lg position-relative">
+                        <div class="position-absolute top-0 start-50 translate-middle">
+                            <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">
+                                <i class="fas fa-star me-1"></i>Önerilen
+                            </span>
+                        </div>
+                        <div class="card-body p-4">
+                            <div class="text-center mb-4">
+                                <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                                    <i class="fas fa-crown fa-2x text-white"></i>
+                                </div>
+                                <h3 class="fw-bold">Pro Plan</h3>
+                                <div class="display-6 fw-bold text-primary mb-2">₺300</div>
+                                <p class="text-muted">Aylık</p>
+                            </div>
+
+                            <ul class="list-unstyled mb-4">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    <strong>Gemini 2.5 Pro</strong> modeli
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Gelişmiş dosya işleme
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Sınırsız chat geçmişi
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Detaylı analiz raporları
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Öncelikli destek
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Gelişmiş AI özellikleri
+                                </li>
+                            </ul>
+
+                            <div class="text-center">
+                                {% if plan_type == 'pro' %}
+                                    <button class="btn btn-primary" disabled>
+                                        <i class="fas fa-check me-2"></i>Mevcut Plan
+                                    </button>
+                                {% else %}
+                                    <a href="/payment" class="btn btn-primary">
+                                        <i class="fas fa-credit-card me-2"></i>Pro'ya Yükselt
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-5">
+                <a href="/chat" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Chat'e Dön
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

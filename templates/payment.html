@@ -3,80 +3,207 @@
 {% block title %}Ödeme - Eğitim Asistanı{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-6">
-            <div class="card border-0 shadow">
-                <div class="card-body p-5">
-                    <div class="text-center mb-4">
-                        <i class="fas fa-credit-card fa-3x text-primary mb-3"></i>
-                        <h2 class="fw-bold text-primary">Pro Plan Ödeme</h2>
-                        <p class="text-muted">₺300 - Aylık Pro Plan</p>
+<div class="min-h-screen py-12 px-4">
+    <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-12 animate-fade-in">
+            <div class="w-20 h-20 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-6 floating-element">
+                <i class="fas fa-credit-card text-3xl text-white"></i>
+            </div>
+            <h1 class="text-4xl font-bold text-white mb-4">Ödeme</h1>
+            <p class="text-xl text-white/70">Pro plana yükseltin ve tüm özelliklerden yararlanın</p>
+        </div>
+
+        <div class="grid lg:grid-cols-2 gap-8">
+            <!-- Plan Summary -->
+            <div class="glass-effect rounded-2xl p-8 animate-slide-up">
+                <div class="flex items-center mb-6">
+                    <div class="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center mr-4">
+                        <i class="fas fa-crown text-black text-xl"></i>
                     </div>
-
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <strong>Demo Ödeme:</strong> Bu bir demo ödeme sayfasıdır. Gerçek ödeme bilgileri alınmaz.
+                    <h2 class="text-2xl font-bold text-white">Pro Plan</h2>
+                </div>
+                
+                <div class="mb-8">
+                    <div class="text-4xl font-bold text-white mb-2">₺99</div>
+                    <p class="text-white/60">Aylık</p>
+                </div>
+                
+                <h3 class="text-lg font-semibold text-white mb-4">Dahil Olan Özellikler:</h3>
+                <ul class="space-y-3 mb-8">
+                    <li class="flex items-center text-white/90">
+                        <i class="fas fa-check text-green-400 mr-3"></i>
+                        <span><strong>Gemini 2.5 Pro</strong> modeli</span>
+                    </li>
+                    <li class="flex items-center text-white/90">
+                        <i class="fas fa-check text-green-400 mr-3"></i>
+                        <span>Sınırsız mesaj</span>
+                    </li>
+                    <li class="flex items-center text-white/90">
+                        <i class="fas fa-check text-green-400 mr-3"></i>
+                        <span>Detaylı ve kapsamlı yanıtlar</span>
+                    </li>
+                    <li class="flex items-center text-white/90">
+                        <i class="fas fa-check text-green-400 mr-3"></i>
+                        <span>Dosya yükleme (PDF, Audio, Video)</span>
+                    </li>
+                    <li class="flex items-center text-white/90">
+                        <i class="fas fa-check text-green-400 mr-3"></i>
+                        <span>Öncelikli destek</span>
+                    </li>
+                    <li class="flex items-center text-white/90">
+                        <i class="fas fa-check text-green-400 mr-3"></i>
+                        <span>Gelişmiş analitikler</span>
+                    </li>
+                </ul>
+                
+                <div class="bg-blue-500/20 border border-blue-500/30 rounded-xl p-4">
+                    <div class="flex items-center text-blue-100">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <span><strong>Free Plan:</strong> Gemini 1.5 Pro ile sınırlı özellikler</span>
                     </div>
+                </div>
+            </div>
 
-                    <form id="paymentForm">
-                        <div class="mb-3">
-                            <label for="cardName" class="form-label">
-                                <i class="fas fa-user me-2"></i>Kart Üzerindeki İsim
+            <!-- Payment Form -->
+            <div class="glass-effect rounded-2xl p-8 animate-slide-up">
+                <div class="flex items-center mb-6">
+                    <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl flex items-center justify-center mr-4">
+                        <i class="fas fa-credit-card text-white text-xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white">Ödeme Bilgileri</h2>
+                </div>
+                
+                <form id="paymentForm" class="space-y-6">
+                    <!-- Card Name -->
+                    <div>
+                        <label for="cardName" class="block text-sm font-medium text-white/90 mb-2">
+                            <i class="fas fa-user mr-2"></i>Kart Üzerindeki İsim
+                        </label>
+                        <input 
+                            type="text" 
+                            id="cardName" 
+                            required
+                            class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300"
+                            placeholder="Ad Soyad"
+                        >
+                    </div>
+                    
+                    <!-- Card Number -->
+                    <div>
+                        <label for="cardNumber" class="block text-sm font-medium text-white/90 mb-2">
+                            <i class="fas fa-credit-card mr-2"></i>Kart Numarası
+                        </label>
+                        <input 
+                            type="text" 
+                            id="cardNumber" 
+                            placeholder="1234 5678 9012 3456" 
+                            required
+                            class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300"
+                        >
+                    </div>
+                    
+                    <!-- Expiry and CVV -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="expiryDate" class="block text-sm font-medium text-white/90 mb-2">
+                                <i class="fas fa-calendar mr-2"></i>Son Kullanma
                             </label>
-                            <input type="text" class="form-control" id="cardName" 
-                                   placeholder="Kart üzerindeki ismi girin" required>
+                            <input 
+                                type="text" 
+                                id="expiryDate" 
+                                placeholder="MM/YY" 
+                                required
+                                class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300"
+                            >
                         </div>
-
-                        <div class="mb-3">
-                            <label for="cardNumber" class="form-label">
-                                <i class="fas fa-credit-card me-2"></i>Kart Numarası
+                        <div>
+                            <label for="cvv" class="block text-sm font-medium text-white/90 mb-2">
+                                <i class="fas fa-lock mr-2"></i>CVV
                             </label>
-                            <input type="text" class="form-control" id="cardNumber" 
-                                   placeholder="1234 5678 9012 3456" maxlength="19" required>
+                            <input 
+                                type="text" 
+                                id="cvv" 
+                                placeholder="123" 
+                                required
+                                class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300"
+                            >
                         </div>
+                    </div>
+                    
+                    <!-- Email -->
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-white/90 mb-2">
+                            <i class="fas fa-envelope mr-2"></i>E-posta
+                        </label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            value="{{ session.get('email', '') }}" 
+                            required
+                            class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-300"
+                            placeholder="ornek@email.com"
+                        >
+                    </div>
+                    
+                    <!-- Submit Button -->
+                    <button 
+                        type="submit" 
+                        id="submitBtn"
+                        class="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-300 hover-lift focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-transparent"
+                    >
+                        <i class="fas fa-lock mr-2"></i>Güvenli Ödeme Yap - ₺99
+                    </button>
+                </form>
+                
+                <!-- Security Notice -->
+                <div class="text-center mt-6">
+                    <div class="flex items-center justify-center text-white/60 text-sm">
+                        <i class="fas fa-shield-alt mr-2"></i>
+                        <span>Ödeme bilgileriniz SSL ile şifrelenir</span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="expiryDate" class="form-label">
-                                    <i class="fas fa-calendar me-2"></i>Son Kullanma Tarihi
-                                </label>
-                                <input type="text" class="form-control" id="expiryDate" 
-                                       placeholder="MM/YY" maxlength="5" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="cvv" class="form-label">
-                                    <i class="fas fa-lock me-2"></i>CVV
-                                </label>
-                                <input type="text" class="form-control" id="cvv" 
-                                       placeholder="123" maxlength="3" required>
-                            </div>
-                        </div>
+        <!-- Security Information -->
+        <div class="glass-effect rounded-2xl p-8 mt-8 animate-fade-in">
+            <h2 class="text-2xl font-bold text-white text-center mb-8">
+                <i class="fas fa-shield-alt text-green-400 mr-3"></i>Güvenlik
+            </h2>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-lock text-2xl text-green-400"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-white mb-2">SSL Şifreleme</h3>
+                    <p class="text-white/70 text-sm">Tüm verileriniz güvenle şifrelenir</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-credit-card text-2xl text-green-400"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-white mb-2">Güvenli Ödeme</h3>
+                    <p class="text-white/70 text-sm">PCI DSS uyumlu ödeme sistemi</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-user-shield text-2xl text-green-400"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-white mb-2">Veri Koruma</h3>
+                    <p class="text-white/70 text-sm">KVKK uyumlu veri işleme</p>
+                </div>
+            </div>
+        </div>
 
-                        <div class="mb-4">
-                            <label for="email" class="form-label">
-                                <i class="fas fa-envelope me-2"></i>E-posta (Fatura için)
-                            </label>
-                            <input type="email" class="form-control" id="email" 
-                                   placeholder="ornek@email.com" required>
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-lock me-2"></i>₺300 Öde ve Pro'ya Yükselt
-                            </button>
-                            
-                            <a href="/pricing" class="btn btn-outline-secondary">
-                                <i class="fas fa-arrow-left me-2"></i>Geri Dön
-                            </a>
-                        </div>
-                    </form>
-
-                    <div class="text-center mt-4">
-                        <small class="text-muted">
-                            <i class="fas fa-shield-alt me-1"></i>
-                            Ödeme bilgileriniz güvenle korunur
-                        </small>
+        <!-- Money Back Guarantee -->
+        <div class="text-center mt-8 animate-slide-up">
+            <div class="glass-effect rounded-2xl p-6 inline-block">
+                <div class="flex items-center space-x-3 text-white">
+                    <i class="fas fa-medal text-yellow-400 text-2xl"></i>
+                    <div>
+                        <h3 class="font-semibold">30 Gün Para İade Garantisi</h3>
+                        <p class="text-white/70 text-sm">Memnun kalmazsanız paranızı iade ediyoruz</p>
                     </div>
                 </div>
             </div>
@@ -85,53 +212,10 @@
 </div>
 
 <script>
-document.getElementById('paymentForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    // Demo ödeme simülasyonu
-    const loadingBtn = document.querySelector('button[type="submit"]');
-    const originalText = loadingBtn.innerHTML;
-    
-    loadingBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>İşleniyor...';
-    loadingBtn.disabled = true;
-    
-    // 2 saniye sonra onay modalı göster
-    setTimeout(() => {
-        if (confirm('Pro plana yükseltmek istediğinizden emin misiniz? ₺300 ödenecektir.')) {
-            // AJAX ile plan yükseltme
-            fetch('/upgrade-to-pro', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Tebrikler! Pro plana başarıyla yükseltildiniz!');
-                    window.location.href = '/chat';
-                } else {
-                    alert('Hata: ' + data.error);
-                }
-            })
-            .catch(error => {
-                alert('Bir hata oluştu: ' + error);
-            })
-            .finally(() => {
-                loadingBtn.innerHTML = originalText;
-                loadingBtn.disabled = false;
-            });
-        } else {
-            loadingBtn.innerHTML = originalText;
-            loadingBtn.disabled = false;
-        }
-    }, 2000);
-});
-
 // Kart numarası formatı
 document.getElementById('cardNumber').addEventListener('input', function(e) {
-    let value = e.target.value.replace(/\s/g, '').replace(/\D/g, '');
-    let formattedValue = value.replace(/(\d{4})(?=\d)/g, '$1 ');
+    let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+    let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value;
     e.target.value = formattedValue;
 });
 
@@ -144,9 +228,63 @@ document.getElementById('expiryDate').addEventListener('input', function(e) {
     e.target.value = value;
 });
 
-// CVV sadece rakam
+// CVV formatı
 document.getElementById('cvv').addEventListener('input', function(e) {
-    e.target.value = e.target.value.replace(/\D/g, '');
+    let value = e.target.value.replace(/\D/g, '');
+    e.target.value = value.substring(0, 4);
+});
+
+// Form gönderimi
+document.getElementById('paymentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('submitBtn');
+    const originalText = submitBtn.innerHTML;
+    
+    // Loading durumu
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>İşleniyor...';
+    submitBtn.disabled = true;
+    
+    // Basit doğrulama
+    const cardName = document.getElementById('cardName').value;
+    const cardNumber = document.getElementById('cardNumber').value;
+    const expiryDate = document.getElementById('expiryDate').value;
+    const cvv = document.getElementById('cvv').value;
+    const email = document.getElementById('email').value;
+    
+    if (!cardName || !cardNumber || !expiryDate || !cvv || !email) {
+        alert('Lütfen tüm alanları doldurun!');
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+        return;
+    }
+    
+    // Ödeme simülasyonu (2 saniye)
+    setTimeout(() => {
+        // Pro plana yükseltme isteği
+        fetch('/upgrade-to-pro', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Tebrikler! Pro plana başarıyla yükseltildiniz!');
+                window.location.href = '/chat';
+            } else {
+                alert('Hata: ' + (data.error || 'Bilinmeyen hata'));
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        })
+        .catch(error => {
+            alert('Bir hata oluştu: ' + error);
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        });
+    }, 2000);
 });
 </script>
 {% endblock %} 

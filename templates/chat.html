@@ -3,116 +3,217 @@
 {% block title %}Chat - Eğitim Asistanı{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        <div class="col-md-3 col-lg-2 d-none d-md-block bg-light sidebar">
-            <div class="position-sticky pt-3">
-                <div class="text-center mb-4">
-                    <i class="fas fa-graduation-cap fa-2x text-primary mb-2"></i>
-                    <h5 class="fw-bold text-primary">Eğitim Asistanı</h5>
-                    <p class="text-muted small">{{ full_name }}</p>
-                    
-                    <!-- Plan Bilgisi -->
-                    <div class="mb-3">
-                        {% if plan_type == 'pro' %}
-                            <span class="badge bg-warning text-dark">
-                                <i class="fas fa-crown me-1"></i>Pro Plan
-                            </span>
-                        {% else %}
-                            <span class="badge bg-secondary">
-                                <i class="fas fa-user me-1"></i>Free Plan
-                            </span>
-                        {% endif %}
+<div class="flex h-screen bg-transparent">
+    <!-- Sidebar -->
+    <div class="hidden lg:flex lg:w-80 lg:flex-col">
+        <div class="flex flex-col flex-1 glass-effect m-4 rounded-2xl">
+            <!-- User Profile -->
+            <div class="p-6 border-b border-white/10">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-user text-white"></i>
                     </div>
-                    
-                    <!-- Pro Yükseltme Butonu -->
-                    {% if plan_type == 'free' and username != 'Misafir' %}
-                        <div class="mb-3">
-                            <a href="/pricing" class="btn btn-sm btn-primary">
-                                <i class="fas fa-crown me-1"></i>Pro'ya Yükselt
-                            </a>
+                    <div>
+                        <h3 class="text-white font-semibold">{{ full_name }}</h3>
+                        <div class="flex items-center space-x-2">
+                            {% if plan_type == 'pro' %}
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-500/20 text-yellow-300">
+                                    <i class="fas fa-crown mr-1"></i>Pro
+                                </span>
+                                <span class="text-xs text-white/60">Gemini 2.5 Pro</span>
+                            {% else %}
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-500/20 text-gray-300">
+                                    <i class="fas fa-user mr-1"></i>Free
+                                </span>
+                                <span class="text-xs text-white/60">Gemini 1.5 Pro</span>
+                            {% endif %}
                         </div>
-                    {% endif %}
+                    </div>
                 </div>
+                
+                {% if plan_type == 'free' and username != 'Misafir' %}
+                    <a href="/pricing" class="mt-4 w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-medium py-2 px-4 rounded-xl transition-all duration-300 hover-lift flex items-center justify-center">
+                        <i class="fas fa-crown mr-2"></i>Pro'ya Yükselt
+                    </a>
+                {% endif %}
+            </div>
 
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">
-                            <i class="fas fa-comments me-2"></i>Chat
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/chats">
-                            <i class="fas fa-list me-2"></i>Chatler
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/pricing">
-                            <i class="fas fa-star me-2"></i>Planlar
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/logout">
-                            <i class="fas fa-sign-out-alt me-2"></i>Çıkış
-                        </a>
-                    </li>
-                </ul>
+            <!-- Navigation -->
+            <nav class="flex-1 p-4 space-y-2">
+                <a href="#" class="flex items-center space-x-3 px-4 py-3 rounded-xl bg-white/10 text-white">
+                    <i class="fas fa-comments"></i>
+                    <span>Chat</span>
+                </a>
+                <a href="/chats" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/5 transition-colors">
+                    <i class="fas fa-history"></i>
+                    <span>Geçmiş</span>
+                </a>
+                <a href="/pricing" class="flex items-center space-x-3 px-4 py-3 rounded-xl text-white/70 hover:text-white hover:bg-white/5 transition-colors">
+                    <i class="fas fa-star"></i>
+                    <span>Planlar</span>
+                </a>
+            </nav>
+
+            <!-- Quick Actions -->
+            <div class="p-4 border-t border-white/10">
+                <button onclick="openNewChatModal()" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 hover-lift flex items-center justify-center">
+                    <i class="fas fa-plus mr-2"></i>Yeni Chat
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Chat Area -->
+    <div class="flex-1 flex flex-col">
+        <!-- Header -->
+        <div class="glass-effect m-4 mb-0 rounded-t-2xl p-4 border-b border-white/10">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                        <i class="fas fa-robot text-white"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-white font-semibold" id="currentChatTitle">Eğitim Asistanı</h2>
+                        <p class="text-white/60 text-sm">Size nasıl yardımcı olabilirim?</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center space-x-2">
+                    <button onclick="clearChat()" class="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <button class="lg:hidden p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Current Chat Info -->
+            <div id="currentChatInfo" class="hidden mt-4 p-3 bg-blue-500/20 border border-blue-500/30 rounded-xl">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-comments text-blue-300"></i>
+                        <span class="text-blue-100 font-medium">Mevcut Chat:</span>
+                        <span id="currentChatName" class="text-white">Yeni Chat</span>
+                    </div>
+                    <button onclick="saveChatName()" class="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors">
+                        <i class="fas fa-save mr-1"></i>Kaydet
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="col-md-9 col-lg-10 ms-sm-auto px-md-4">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">Chat</h1>
-                <div class="btn-toolbar mb-2 mb-md-0">
-                    <div class="btn-group me-2">
-                        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearChat()">
-                            <i class="fas fa-trash me-1"></i>Temizle
-                        </button>
+        <!-- File Upload Area -->
+        <div class="glass-effect mx-4 rounded-xl p-4 mb-4">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-white font-medium flex items-center">
+                    <i class="fas fa-paperclip mr-2"></i>Dosya Yükle
+                </h3>
+                <span class="text-white/60 text-sm">PDF, Audio, Video</span>
+            </div>
+            
+            <div id="fileUploadArea" class="border-2 border-dashed border-white/30 rounded-xl p-6 text-center hover:border-purple-400 hover:bg-white/5 transition-all duration-300 cursor-pointer">
+                <div class="space-y-3">
+                    <div class="w-16 h-16 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl flex items-center justify-center mx-auto">
+                        <i class="fas fa-cloud-upload-alt text-2xl text-purple-300"></i>
                     </div>
+                    <div>
+                        <p class="text-white/80 font-medium">Dosyanızı buraya sürükleyin</p>
+                        <p class="text-white/60 text-sm">veya dosya seçmek için tıklayın</p>
+                    </div>
+                    <input type="file" id="fileInput" class="hidden" accept=".pdf,.mp3,.wav,.m4a,.mp4,.avi,.mov,.mkv,.webm,.txt,.doc,.docx">
+                    <button onclick="document.getElementById('fileInput').click()" class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium py-2 px-6 rounded-xl transition-all duration-300 hover-lift">
+                        <i class="fas fa-folder-open mr-2"></i>Dosya Seç
+                    </button>
                 </div>
             </div>
+            
+            <div id="fileInfo" class="hidden mt-4 p-3 bg-green-500/20 border border-green-500/30 rounded-xl">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-file text-green-300"></i>
+                        <span id="fileName" class="text-green-100 font-medium"></span>
+                    </div>
+                    <button onclick="clearFile()" class="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg transition-colors">
+                        <i class="fas fa-times mr-1"></i>Temizle
+                    </button>
+                </div>
+            </div>
+        </div>
 
-            <!-- File Upload Area -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h5 class="card-title">
-                        <i class="fas fa-upload me-2"></i>Dosya Yükle
-                    </h5>
-                    <div class="file-upload-area" id="fileUploadArea">
-                        <div class="text-center p-4">
-                            <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">Dosyanızı buraya sürükleyin veya seçin</p>
-                            <input type="file" id="fileInput" class="file-input" accept=".pdf,.mp3,.wav,.m4a,.mp4,.avi,.mov,.mkv,.webm,.txt,.doc,.docx">
-                            <button class="btn btn-primary upload-btn" onclick="document.getElementById('fileInput').click()">
-                                <i class="fas fa-folder-open me-2"></i>Dosya Seç
+        <!-- Chat Messages Area -->
+        <div class="flex-1 glass-effect mx-4 rounded-b-2xl flex flex-col">
+            <!-- Messages Container -->
+            <div id="chatMessages" class="flex-1 p-6 overflow-y-auto scrollbar-hide space-y-4">
+                <!-- Welcome Message -->
+                <div class="flex items-start space-x-3">
+                    <div class="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-robot text-white text-sm"></i>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl rounded-tl-sm p-4 max-w-md">
+                        <p class="text-white/90">Merhaba! Ben eğitim asistanınızım. Size nasıl yardımcı olabilirim?</p>
+                        <div class="flex flex-wrap gap-2 mt-3">
+                            <button onclick="sendQuickMessage('PDF özetleme nasıl çalışır?')" class="px-3 py-1 bg-white/10 hover:bg-white/20 text-white/80 text-sm rounded-lg transition-colors">
+                                PDF Özetleme
+                            </button>
+                            <button onclick="sendQuickMessage('Quiz oluştur')" class="px-3 py-1 bg-white/10 hover:bg-white/20 text-white/80 text-sm rounded-lg transition-colors">
+                                Quiz Oluştur
+                            </button>
+                            <button onclick="sendQuickMessage('Matematik konularında yardım')" class="px-3 py-1 bg-white/10 hover:bg-white/20 text-white/80 text-sm rounded-lg transition-colors">
+                                Matematik
                             </button>
                         </div>
                     </div>
-                    <div id="fileInfo" class="file-info" style="display: none;">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span id="fileName"></span>
-                            <button class="btn btn-sm btn-outline-danger clear-file-btn" onclick="clearFile()">
-                                <i class="fas fa-times me-1"></i>Temizle
-                            </button>
+                </div>
+            </div>
+            
+            <!-- Typing Indicator -->
+            <div id="typingIndicator" class="hidden px-6 pb-2">
+                <div class="flex items-start space-x-3">
+                    <div class="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-robot text-white text-sm"></i>
+                    </div>
+                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl rounded-tl-sm p-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="flex space-x-1">
+                                <div class="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
+                                <div class="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+                                <div class="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+                            </div>
+                            <span class="text-white/70 text-sm" id="typingText">AI düşünüyor...</span>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Chat Area -->
-            <div class="chat-container">
-                <div id="chatMessages" class="chat-messages">
-                    <!-- Messages will be added here -->
+            
+            <!-- Input Area -->
+            <div class="p-6 border-t border-white/10">
+                <div class="flex items-end space-x-3">
+                    <div class="flex-1">
+                        <textarea 
+                            id="messageInput" 
+                            placeholder="Mesajınızı yazın..." 
+                            rows="1"
+                            class="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none transition-all duration-300"
+                            style="min-height: 44px; max-height: 120px;"
+                        ></textarea>
+                    </div>
+                    <button 
+                        onclick="sendMessage()" 
+                        class="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white p-3 rounded-xl transition-all duration-300 hover-lift focus:outline-none focus:ring-2 focus:ring-purple-500 flex-shrink-0"
+                    >
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
                 </div>
                 
-                <div class="chat-input-container">
-                    <div class="input-group">
-                        <textarea id="messageInput" class="form-control" placeholder="Mesajınızı yazın..." rows="2"></textarea>
-                        <button class="btn btn-primary" type="button" onclick="sendMessage()">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
+                <!-- Quick Actions -->
+                <div class="flex items-center justify-between mt-3">
+                    <div class="flex items-center space-x-2 text-white/60 text-sm">
+                        <i class="fas fa-lightbulb"></i>
+                        <span>İpucu: Dosya yükleyerek analiz yaptırabilirsiniz</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-white/60 text-xs">Enter ile gönder</span>
                     </div>
                 </div>
             </div>
@@ -120,119 +221,142 @@
     </div>
 </div>
 
+<!-- New Chat Modal -->
+<div id="newChatModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="glass-effect rounded-2xl p-6 w-full max-w-md animate-slide-up">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-xl font-semibold text-white flex items-center">
+                <i class="fas fa-plus mr-2"></i>Yeni Chat Oluştur
+            </h3>
+            <button onclick="closeNewChatModal()" class="text-white/60 hover:text-white transition-colors">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+        
+        <form id="newChatForm" class="space-y-4">
+            <div>
+                <label for="chatName" class="block text-sm font-medium text-white/90 mb-2">
+                    <i class="fas fa-edit mr-2"></i>Chat Adı
+                </label>
+                <input 
+                    type="text" 
+                    id="chatName" 
+                    placeholder="Örn: Matematik Dersi, İngilizce Çalışma" 
+                    required
+                    class="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
+                >
+                <p class="text-white/60 text-sm mt-2">Chat'inizi tanımlayıcı bir isimle adlandırın.</p>
+            </div>
+            
+            <div class="flex space-x-3 pt-4">
+                <button 
+                    type="button" 
+                    onclick="closeNewChatModal()" 
+                    class="flex-1 px-4 py-3 border border-white/30 text-white rounded-xl hover:bg-white/10 transition-all duration-300"
+                >
+                    İptal
+                </button>
+                <button 
+                    type="button" 
+                    onclick="createNewChat()" 
+                    class="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium py-3 px-4 rounded-xl transition-all duration-300 hover-lift"
+                >
+                    <i class="fas fa-plus mr-2"></i>Oluştur
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <style>
-.sidebar {
-    min-height: 100vh;
-    box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+/* Auto-resize textarea */
+#messageInput {
+    resize: none;
+    overflow-y: hidden;
 }
 
-.chat-container {
-    height: calc(100vh - 200px);
-    display: flex;
-    flex-direction: column;
+/* Custom scrollbar for chat messages */
+#chatMessages::-webkit-scrollbar {
+    width: 6px;
 }
 
-.chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 1rem;
-    background: #f8f9fa;
-    border-radius: 0.375rem;
-    margin-bottom: 1rem;
+#chatMessages::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
 }
 
-.message {
-    margin-bottom: 1rem;
-    padding: 0.75rem;
-    border-radius: 0.5rem;
-    max-width: 80%;
+#chatMessages::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
 }
 
-.user-message {
-    background: #007bff;
-    color: white;
-    margin-left: auto;
+#chatMessages::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
 }
 
-.ai-message {
-    background: white;
-    border: 1px solid #dee2e6;
+/* Message animations */
+.message-enter {
+    animation: messageSlideIn 0.3s ease-out;
 }
 
-.ai-message h3 {
-    color: #007bff;
-    font-size: 1.1rem;
-    margin-bottom: 0.5rem;
+@keyframes messageSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-.ai-message h4 {
-    color: #495057;
-    font-size: 1rem;
-    margin-bottom: 0.5rem;
-}
-
-.ai-message strong {
-    color: #007bff;
-}
-
-.ai-message ul {
-    margin-bottom: 0.5rem;
-}
-
-.ai-message li {
-    margin-bottom: 0.25rem;
-}
-
-.ai-message hr {
-    margin: 1rem 0;
-    border-color: #dee2e6;
-}
-
-.chat-input-container {
-    padding: 1rem;
-    background: white;
-    border-top: 1px solid #dee2e6;
-}
-
-.file-upload-area {
-    border: 2px dashed #dee2e6;
-    border-radius: 0.5rem;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-.file-upload-area:hover {
-    border-color: #007bff;
-    background-color: #f8f9fa;
-}
-
+/* File upload drag and drop */
 .file-upload-area.dragover {
-    border-color: #007bff;
-    background-color: #e3f2fd;
+    border-color: #a855f7 !important;
+    background-color: rgba(168, 85, 247, 0.1) !important;
 }
 
-.file-info {
-    background: #e3f2fd;
-    padding: 0.75rem;
-    border-radius: 0.375rem;
-    margin-top: 1rem;
+/* Responsive design */
+@media (max-width: 1024px) {
+    .lg\\:w-80 {
+        display: none;
+    }
 }
 
-.upload-btn {
-    margin-top: 1rem;
+/* Loading animation for buttons */
+.loading {
+    position: relative;
+    pointer-events: none;
 }
 
-.clear-file-btn {
-    font-size: 0.875rem;
+.loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    margin: auto;
+    border: 2px solid transparent;
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
 }
 
-.file-input {
-    display: none;
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 <script>
+// Initialize Socket.IO
+const socket = io();
+
 // Markdown ayarları
 marked.setOptions({
     breaks: true,
@@ -240,6 +364,35 @@ marked.setOptions({
 });
 
 let currentFile = null;
+let currentChatSession = null;
+let isProcessing = false;
+
+// Auto-resize textarea
+function autoResize(textarea) {
+    textarea.style.height = 'auto';
+    textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+}
+
+document.getElementById('messageInput').addEventListener('input', function() {
+    autoResize(this);
+});
+
+// Modal functions
+function openNewChatModal() {
+    document.getElementById('newChatModal').classList.remove('hidden');
+    document.getElementById('chatName').focus();
+}
+
+function closeNewChatModal() {
+    document.getElementById('newChatModal').classList.add('hidden');
+    document.getElementById('chatName').value = '';
+}
+
+// Quick message function
+function sendQuickMessage(message) {
+    document.getElementById('messageInput').value = message;
+    sendMessage();
+}
 
 // Dosya yükleme işlemleri
 document.getElementById('fileInput').addEventListener('change', function(e) {
@@ -272,7 +425,99 @@ fileUploadArea.addEventListener('drop', function(e) {
     }
 });
 
+function addMessage(role, content) {
+    const chatMessages = document.getElementById('chatMessages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'flex items-start space-x-3 message-enter';
+    
+    if (role === 'user') {
+        messageDiv.innerHTML = `
+            <div class="flex-1"></div>
+            <div class="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl rounded-tr-sm p-4 max-w-md">
+                <p class="text-white">${content}</p>
+            </div>
+            <div class="w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-user text-white text-sm"></i>
+            </div>
+        `;
+    } else {
+        const renderedContent = marked.parse(content);
+        messageDiv.innerHTML = `
+            <div class="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-robot text-white text-sm"></i>
+            </div>
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl rounded-tl-sm p-4 max-w-2xl">
+                <div class="text-white/90 prose prose-invert max-w-none">${renderedContent}</div>
+            </div>
+        `;
+    }
+    
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Dosya mesajını chat içinde göster
+function addFileMessage(filename, fileType) {
+    const chatMessages = document.getElementById('chatMessages');
+    const fileDiv = document.createElement('div');
+    fileDiv.className = 'flex items-start space-x-3 message-enter';
+    
+    const fileIcon = getFileIcon(fileType);
+    
+    fileDiv.innerHTML = `
+        <div class="flex-1"></div>
+        <div class="bg-gradient-to-r from-blue-600 to-cyan-600 rounded-2xl rounded-tr-sm p-4 max-w-md">
+            <div class="flex items-center space-x-3 text-white">
+                <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                    <i class="fas ${fileIcon}"></i>
+                </div>
+                <div>
+                    <p class="font-medium">${filename}</p>
+                    <p class="text-white/80 text-sm">${fileType} dosyası yüklendi</p>
+                </div>
+            </div>
+        </div>
+        <div class="w-8 h-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-user text-white text-sm"></i>
+        </div>
+    `;
+    
+    chatMessages.appendChild(fileDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+// Dosya türüne göre icon seç
+function getFileIcon(fileType) {
+    switch(fileType.toLowerCase()) {
+        case 'pdf':
+            return 'fa-file-pdf';
+        case 'mp3':
+        case 'wav':
+        case 'm4a':
+            return 'fa-file-audio';
+        case 'mp4':
+        case 'avi':
+        case 'mov':
+        case 'mkv':
+        case 'webm':
+            return 'fa-file-video';
+        case 'txt':
+            return 'fa-file-text';
+        case 'doc':
+        case 'docx':
+            return 'fa-file-word';
+        default:
+            return 'fa-file';
+    }
+}
+
+// Dosya yükleme işlemlerini güncelle
 function uploadFile(file) {
+    // Eğer mesaj işleniyorsa dosya yükleme devre dışı
+    if (isProcessing) {
+        return;
+    }
+    
     const formData = new FormData();
     formData.append('file', file);
 
@@ -285,6 +530,12 @@ function uploadFile(file) {
         if (data.success) {
             currentFile = data;
             showFileInfo(file.name, data.type);
+            
+            // Dosyayı chat içinde göster
+            addFileMessage(file.name, data.type);
+            
+            // Dosya yükleme alanını GİZLEME - hep açık kalsın
+            // document.getElementById('fileUploadArea').style.display = 'none';
         } else {
             alert('Dosya yükleme hatası: ' + data.error);
         }
@@ -296,7 +547,7 @@ function uploadFile(file) {
 
 function showFileInfo(filename, fileType) {
     document.getElementById('fileName').textContent = `${filename} (${fileType})`;
-    document.getElementById('fileInfo').style.display = 'block';
+    document.getElementById('fileInfo').classList.remove('hidden');
 }
 
 function clearFile() {
@@ -307,10 +558,99 @@ function clearFile() {
     .then(data => {
         if (data.success) {
             currentFile = null;
-            document.getElementById('fileInfo').style.display = 'none';
+            document.getElementById('fileInfo').classList.add('hidden');
             document.getElementById('fileInput').value = '';
         }
     });
+}
+
+// Yeni chat oluşturma
+function createNewChat() {
+    const chatName = document.getElementById('chatName').value.trim();
+    
+    if (!chatName) {
+        alert('Lütfen chat adı girin!');
+        return;
+    }
+    
+    fetch('/api/new-chat', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ chat_name: chatName })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Modal'ı kapat
+            const modal = bootstrap.Modal.getInstance(document.getElementById('newChatModal'));
+            modal.hide();
+            
+            // Chat bilgilerini güncelle
+            currentChatSession = data.session_id;
+            document.getElementById('currentChatName').textContent = chatName;
+            document.getElementById('currentChatInfo').style.display = 'block';
+            
+            // Chat mesajlarını temizle
+            document.getElementById('chatMessages').innerHTML = '';
+            
+            // Form'u temizle
+            document.getElementById('chatName').value = '';
+            
+            // Başarı mesajı
+            showAlert('Yeni chat başarıyla oluşturuldu!', 'success');
+        } else {
+            alert('Hata: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Bir hata oluştu: ' + error);
+    });
+}
+
+// Chat adını kaydet
+function saveChatName() {
+    const chatName = document.getElementById('currentChatName').textContent;
+    
+    fetch('/api/update-chat-name', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+            session_id: currentChatSession,
+            chat_name: chatName 
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('Chat adı başarıyla kaydedildi!', 'success');
+        } else {
+            alert('Hata: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Bir hata oluştu: ' + error);
+    });
+}
+
+// Alert gösterme fonksiyonu
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.querySelector('.container-fluid').insertBefore(alertDiv, document.querySelector('.row'));
+    
+    // 3 saniye sonra otomatik kaldır
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 3000);
 }
 
 // Chat işlemleri
@@ -318,10 +658,37 @@ function sendMessage() {
     const messageInput = document.getElementById('messageInput');
     const message = messageInput.value.trim();
     
-    if (!message) return;
+    if (!message && !currentFile) {
+        return;
+    }
     
-    addMessage('user', message);
-    messageInput.value = '';
+    // Eğer mesaj işleniyorsa yeni mesaj gönderme
+    if (isProcessing) {
+        return;
+    }
+    
+    // Mesaj işlenmeye başladı
+    isProcessing = true;
+    
+    // Gönder butonunu devre dışı bırak
+    const sendButton = document.querySelector('button[onclick="sendMessage()"]');
+    if (sendButton) {
+        sendButton.disabled = true;
+        sendButton.classList.add('loading');
+        sendButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    }
+    
+    // Mesaj input'unu devre dışı bırak
+    messageInput.disabled = true;
+    
+    // Typing indicator'ı göster
+    showTypingIndicator();
+    
+    if (message) {
+        addMessage('user', message);
+        messageInput.value = '';
+        autoResize(messageInput);
+    }
     
     // AI yanıtını al
     fetch('/api/chat', {
@@ -329,49 +696,253 @@ function sendMessage() {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message: message })
+        body: JSON.stringify({ 
+            message: message,
+            session_id: currentChatSession 
+        })
     })
     .then(response => response.json())
     .then(data => {
+        // Typing indicator'ı gizle
+        hideTypingIndicator();
+        
         if (data.response) {
             addMessage('assistant', data.response);
+            // Session ID'yi güncelle
+            if (data.session_id && !currentChatSession) {
+                currentChatSession = data.session_id;
+                document.getElementById('currentChatInfo').classList.remove('hidden');
+            }
         } else if (data.error) {
             addMessage('assistant', 'Hata: ' + data.error);
         }
     })
     .catch(error => {
+        // Typing indicator'ı gizle
+        hideTypingIndicator();
         addMessage('assistant', 'Bir hata oluştu: ' + error);
+    })
+    .finally(() => {
+        // Mesaj işleme tamamlandı
+        isProcessing = false;
+        
+        // Gönder butonunu tekrar aktif et
+        if (sendButton) {
+            sendButton.disabled = false;
+            sendButton.classList.remove('loading');
+            sendButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
+        }
+        
+        // Mesaj input'unu tekrar aktif et
+        messageInput.disabled = false;
+        messageInput.focus();
+        
+        // Dosya bilgilerini temizle
+        clearFileUploadArea();
     });
 }
 
-function addMessage(role, content) {
-    const chatMessages = document.getElementById('chatMessages');
-    const messageDiv = document.createElement('div');
-    messageDiv.className = `message ${role}-message`;
-    
-    if (role === 'assistant') {
-        // Markdown render et
-        messageDiv.innerHTML = marked.parse(content);
-    } else {
-        messageDiv.textContent = content;
+// Typing indicator'ı göster
+function showTypingIndicator() {
+    const typingIndicator = document.getElementById('typingIndicator');
+    if (typingIndicator) {
+        typingIndicator.classList.remove('hidden');
     }
+}
+
+// Typing indicator'ı gizle
+function hideTypingIndicator() {
+    const typingIndicator = document.getElementById('typingIndicator');
+    if (typingIndicator) {
+        typingIndicator.classList.add('hidden');
+    }
+}
+
+// Tool durumu göster
+function showToolStatus(toolStatus) {
+    const typingIndicator = document.getElementById('typingIndicator');
+    const typingText = document.getElementById('typingText');
     
-    chatMessages.appendChild(messageDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
+    if (typingIndicator && typingText) {
+        // Durum metnini güncelle
+        if (toolStatus.status) {
+            typingText.textContent = toolStatus.status;
+        }
+        
+        typingIndicator.classList.remove('hidden');
+    }
+}
+
+// Dosya yükleme alanını temizle
+function clearFileUploadArea() {
+    // Dosya input'unu temizle
+    document.getElementById('fileInput').value = '';
+    
+    // Dosya bilgisini gizle
+    document.getElementById('fileInfo').style.display = 'none';
+    
+    // Dosya yükleme alanını GİZLEME - hep açık kalsın
+    // document.getElementById('fileUploadArea').style.display = 'none';
+    
+    // Current file'ı temizle
+    currentFile = null;
 }
 
 function clearChat() {
     if (confirm('Chat geçmişini temizlemek istediğinizden emin misiniz?')) {
-        document.getElementById('chatMessages').innerHTML = '';
+        const chatMessages = document.getElementById('chatMessages');
+        chatMessages.innerHTML = `
+            <!-- Welcome Message -->
+            <div class="flex items-start space-x-3">
+                <div class="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-robot text-white text-sm"></i>
+                </div>
+                <div class="bg-white/10 backdrop-blur-sm rounded-2xl rounded-tl-sm p-4 max-w-md">
+                    <p class="text-white/90">Merhaba! Ben eğitim asistanınızım. Size nasıl yardımcı olabilirim?</p>
+                    <div class="flex flex-wrap gap-2 mt-3">
+                        <button onclick="sendQuickMessage('PDF özetleme nasıl çalışır?')" class="px-3 py-1 bg-white/10 hover:bg-white/20 text-white/80 text-sm rounded-lg transition-colors">
+                            PDF Özetleme
+                        </button>
+                        <button onclick="sendQuickMessage('Quiz oluştur')" class="px-3 py-1 bg-white/10 hover:bg-white/20 text-white/80 text-sm rounded-lg transition-colors">
+                            Quiz Oluştur
+                        </button>
+                        <button onclick="sendQuickMessage('Matematik konularında yardım')" class="px-3 py-1 bg-white/10 hover:bg-white/20 text-white/80 text-sm rounded-lg transition-colors">
+                            Matematik
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        currentChatSession = null;
+        document.getElementById('currentChatInfo').classList.add('hidden');
     }
 }
 
 // Enter tuşu ile mesaj gönderme
-document.getElementById('messageInput').addEventListener('keypress', function(e) {
+document.getElementById('messageInput').addEventListener('keydown', function(e) {
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
+        
+        // Eğer mesaj işleniyorsa Enter tuşunu devre dışı bırak
+        if (isProcessing) {
+            return;
+        }
+        
         sendMessage();
     }
+});
+
+// Sayfa yüklendiğinde mevcut chat'i kontrol et
+document.addEventListener('DOMContentLoaded', function() {
+    // URL'den session_id kontrol et
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session');
+    
+    if (sessionId) {
+        // Mevcut chat'i yükle
+        loadChat(sessionId);
+    }
+});
+
+// Chat yükleme
+function loadChat(sessionId) {
+    fetch(`/api/load-chat?session_id=${sessionId}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            currentChatSession = sessionId;
+            document.getElementById('currentChatName').textContent = data.chat_name;
+            document.getElementById('currentChatInfo').style.display = 'block';
+            
+            // Mesajları yükle
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.innerHTML = '';
+            
+            data.messages.forEach(msg => {
+                addMessage(msg.message_type, msg.content);
+            });
+        } else {
+            alert('Chat yüklenirken hata oluştu: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Chat yüklenirken hata oluştu: ' + error);
+    });
+}
+
+// WebSocket mesaj dinleyicisi
+socket.on('user_message', function(data) {
+    addMessage('user', data.message);
+});
+
+socket.on('bot_message', function(data) {
+    // Typing indicator'ı gizle
+    hideTypingIndicator();
+    
+    addMessage('assistant', data.message);
+    
+    // AI yanıtı geldiğinde işleme durumunu sıfırla
+    isProcessing = false;
+    
+    // Gönder butonunu tekrar aktif et
+    const sendButton = document.querySelector('.send-button');
+    if (sendButton) {
+        sendButton.disabled = false;
+        sendButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
+    }
+    
+    // Mesaj input'unu tekrar aktif et
+    const messageInput = document.getElementById('messageInput');
+    messageInput.disabled = false;
+    messageInput.focus();
+    
+    // Dosya bilgilerini temizle
+    clearFileUploadArea();
+});
+
+socket.on('typing', function(data) {
+    // Yazıyor durumu göster/gizle
+    if (data.status) {
+        showTypingIndicator();
+    } else {
+        hideTypingIndicator();
+    }
+});
+
+socket.on('tool_status', function(data) {
+    // Tool durumunu göster
+    showToolStatus(data);
+});
+
+socket.on('error', function(data) {
+    // Typing indicator'ı gizle
+    hideTypingIndicator();
+    
+    addMessage('assistant', 'Hata: ' + data.message);
+    
+    // Hata durumunda da işleme durumunu sıfırla
+    isProcessing = false;
+    
+    // Gönder butonunu tekrar aktif et
+    const sendButton = document.querySelector('.send-button');
+    if (sendButton) {
+        sendButton.disabled = false;
+        sendButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
+    }
+    
+    // Mesaj input'unu tekrar aktif et
+    const messageInput = document.getElementById('messageInput');
+    messageInput.disabled = false;
+    messageInput.focus();
+});
+
+// WebSocket bağlantı durumu
+socket.on('connect', function() {
+    console.log('WebSocket bağlandı');
+});
+
+socket.on('disconnect', function() {
+    console.log('WebSocket bağlantısı kesildi');
 });
 </script>
 {% endblock %} 

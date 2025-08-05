@@ -29,10 +29,10 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 def get_db_connection():
     """Veritabanı bağlantısı oluştur"""
     return pymysql.connect(
-        host=os.getenv('DB_HOST', 'localhost'),
-        user=os.getenv('DB_USER', 'root'),
-        password=os.getenv('DB_PASSWORD', ''),
-        database=os.getenv('DB_NAME', 'education_mcp'),
+        host=os.getenv('DB_HOST'),
+        user=os.getenv('DB_USER'),
+        password=os.getenv('DB_PASSWORD'),
+        database=os.getenv('DB_NAME'),
         charset='utf8mb4',
         cursorclass=pymysql.cursors.DictCursor
     )
@@ -53,25 +53,117 @@ MCP = {
     "name": "Eğitim Asistanı"
 }
 
+def get_current_user_uploaded_file(user_id):
+    """Mevcut kullanıcının en son yüklediği aktif dosyayı getir"""
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            sql = """
+            SELECT file_path, file_type FROM uploaded_files 
+            WHERE user_id = %s AND is_active = 1 
+            ORDER BY uploaded_at DESC 
+            LIMIT 1
+            """
+            cursor.execute(sql, (user_id,))
+            result = cursor.fetchone()
+            return result if result else None
+    finally:
+        conn.close()
+
 # --------------------------- Sistem Prompt -----------------------------------
-SYSTEM_PROMPT_FREE = """
+def get_system_prompt_free(user_id=None, session_id=None):
+    """Free sürüm için sistem prompt'u oluştur"""
+    file_path_info = ""
+    
+    if user_id and session_id:
+        # Mevcut oturumun son dosya yolunu al
+        current_file_path = get_current_session_file_path(session_id, user_id)
+        if current_file_path:
+            # Dosya bilgilerini al
+            file_info = get_file_info_by_path(current_file_path)
+            if file_info:
+                import os
+                dosya_adi = os.path.basename(file_info['file_path'])
+                file_path_info = f"\n\nKULLANICI DOSYASI: {dosya_adi} ({file_info['file_type']})"
+    
+    return f"""
 Eğitim Asistanısın (Free Sürüm). Kullanıcının sorusuna detaylı ve kapsamlı cevap ver. gerekli toolları çağır.
 
+KRİTİK KURAL: Hiçbir işlemi tool kullanmadan yapma! Her işlem için uygun tool'u kullan.
+
+DOSYA İŞLEME KURALLARI:
+- Kullanıcının yüklediği dosyalar "C:\\mcpler\\education_mcp\\shared_uploads\\" klasöründe bulunur
+- Eğer kullanıcı dosya yüklediyse, bu dosyayı işlemek için uygun tool'u kullan:
+  * PDF dosyaları için: pdf_ozetle(dosya_adi, ozet_tipi="kapsamli", hedef_dil="Türkçe")
+  * Ses dosyaları için: ses_dosyasini_transkript_et(dosya_adi, cikti_tipi="ozet", hedef_dil="Türkçe")
+  * Video dosyaları için: videoyu_ozetle(video_dosyasi_yolu=dosya_adi, ozet_tipi="kapsamli", hedef_dil="Türkçe")
+- Dosya adını tam yol olarak değil, sadece dosya adı olarak kullan
+- Tool çağrısında dosya adını parametre olarak ver
+- Kullanıcı "önceki dosyam", "daha önce yüklediğim dosya" gibi ifadeler kullanırsa, o dosyayı anlık olarak işle ve sonra sil
+- Dosyalar sadece bir kez kullanılır, sonra otomatik olarak temizlenir
+
+DİĞER İŞLEMLER İÇİN TOOL KULLANIMI:
+- Quiz oluşturma için: soru_olustur(konu, soru_sayisi, zorluk, soru_tipi)
+- Web araması için: soru_olustur fonksiyonunun web_arama parametresi
+- Her işlem için mutlaka uygun tool'u çağır{file_path_info}
+
 KRİTİK KURALLAR: 
+- Hiçbir işlemi tool kullanmadan yapma!
+- Her dosya işlemi için uygun tool'u kullan
+- Her quiz oluşturma için soru_olustur tool'unu kullan
+- Tool kullanmadan hiçbir cevap verme
 - JSON verisini okunaklı formata çevir
-- Sonuç yoksa sadece "Bulunamadı" de
+- Sonuç yoksa "Bulunamadı" de
 - Türkçe ve anlaşılır cevaplar ver
 - Detaylı, kapsamlı ve uzun cevaplar ver
 - Örnekler ve açıklamalar ekle
 - Adım adım çözümler sun
 """
 
-SYSTEM_PROMPT_PRO = """
+def get_system_prompt_pro(user_id=None, session_id=None):
+    """Pro sürüm için sistem prompt'u oluştur"""
+    file_path_info = ""
+    
+    if user_id and session_id:
+        # Mevcut oturumun son dosya yolunu al
+        current_file_path = get_current_session_file_path(session_id, user_id)
+        if current_file_path:
+            # Dosya bilgilerini al
+            file_info = get_file_info_by_path(current_file_path)
+            if file_info:
+                import os
+                dosya_adi = os.path.basename(file_info['file_path'])
+                file_path_info = f"\n\nKULLANICI DOSYASI: {dosya_adi} ({file_info['file_type']})"
+    
+    return f"""
 Eğitim Asistanısın (Pro Sürüm). Kullanıcının sorusuna detaylı ve kapsamlı cevap ver. gerekli toolları çağır.
 
+KRİTİK KURAL: Hiçbir işlemi tool kullanmadan yapma! Her işlem için uygun tool'u kullan.
+
+DOSYA İŞLEME KURALLARI:
+- Kullanıcının yüklediği dosyalar "C:\\mcpler\\education_mcp\\shared_uploads\\" klasöründe bulunur
+- Eğer kullanıcı dosya yüklediyse, bu dosyayı işlemek için uygun tool'u kullan:
+  * PDF dosyaları için: pdf_ozetle(dosya_adi, ozet_tipi="kapsamli", hedef_dil="Türkçe")
+  * Ses dosyaları için: ses_dosyasini_transkript_et(dosya_adi, cikti_tipi="ozet", hedef_dil="Türkçe")
+  * Video dosyaları için: videoyu_ozetle(video_dosyasi_yolu=dosya_adi, ozet_tipi="kapsamli", hedef_dil="Türkçe")
+- Dosya adını tam yol olarak değil, sadece dosya adı olarak kullan
+- Tool çağrısında dosya adını parametre olarak ver
+- Dosya yollarını asla kimseye söyleme, sadece toollara gönder
+- Kullanıcı "önceki dosyam", "daha önce yüklediğim dosya" gibi ifadeler kullanırsa, o dosyayı anlık olarak işle ve sonra sil
+- Dosyalar sadece bir kez kullanılır, sonra otomatik olarak temizlenir
+
+DİĞER İŞLEMLER İÇİN TOOL KULLANIMI:
+- Quiz oluşturma için: soru_olustur(konu, soru_sayisi, zorluk, soru_tipi)
+- Web araması için: soru_olustur fonksiyonunun web_arama parametresi
+- Her işlem için mutlaka uygun tool'u çağır{file_path_info}
+
 KRİTİK KURALLAR: 
+- Hiçbir işlemi tool kullanmadan yapma!
+- Her dosya işlemi için uygun tool'u kullan
+- Her quiz oluşturma için soru_olustur tool'unu kullan
+- Tool kullanmadan hiçbir cevap verme
 - JSON verisini okunaklı formata çevir
-- Sonuç yoksa sadece "Bulunamadı" de
+- Sonuç yoksa "Bulunamadı" de
 - Türkçe ve anlaşılır cevaplar ver
 - Pro sürümde detaylı, kapsamlı ve uzun cevaplar ver
 - Örnekler ve açıklamalar ekle
@@ -168,14 +260,14 @@ def get_user_chat_sessions(user_id):
     finally:
         conn.close()
 
-def save_chat_message(session_id, user_id, message_type, content):
-    """Chat mesajını kaydet"""
+def save_chat_message(session_id, user_id, message_type, content, file_path=None):
+    """Chat mesajını kaydet (dosya yolu ile birlikte)"""
     conn = get_db_connection()
     try:
         with conn.cursor() as cursor:
-            sql = """INSERT INTO chat_messages (session_id, user_id, message_type, content) 
-                     VALUES (%s, %s, %s, %s)"""
-            cursor.execute(sql, (session_id, user_id, message_type, content))
+            sql = """INSERT INTO chat_messages (session_id, user_id, message_type, content, file_path) 
+                     VALUES (%s, %s, %s, %s, %s)"""
+            cursor.execute(sql, (session_id, user_id, message_type, content, file_path))
             conn.commit()
             return cursor.lastrowid
     finally:
@@ -191,6 +283,38 @@ def get_chat_messages(session_id):
                      ORDER BY created_at ASC"""
             cursor.execute(sql, (session_id,))
             return cursor.fetchall()
+    finally:
+        conn.close()
+
+def get_current_session_file_path(session_id, user_id):
+    """Mevcut oturumun son dosya yolunu getir"""
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            sql = """
+            SELECT file_path FROM chat_messages 
+            WHERE session_id = %s AND user_id = %s AND file_path IS NOT NULL 
+            ORDER BY created_at DESC 
+            LIMIT 1
+            """
+            cursor.execute(sql, (session_id, user_id))
+            result = cursor.fetchone()
+            return result['file_path'] if result else None
+    finally:
+        conn.close()
+
+def get_file_info_by_path(file_path):
+    """Dosya yoluna göre dosya bilgilerini getir"""
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            sql = """
+            SELECT file_path, file_type FROM uploaded_files 
+            WHERE file_path = %s AND is_active = 1
+            """
+            cursor.execute(sql, (file_path,))
+            result = cursor.fetchone()
+            return result if result else None
     finally:
         conn.close()
 
@@ -260,8 +384,35 @@ def update_chat_session_name(session_id, chat_name):
     finally:
         conn.close()
 
+def delete_chat_session(session_id, user_id):
+    """Chat session'ı ve tüm mesajlarını sil"""
+    conn = get_db_connection()
+    try:
+        with conn.cursor() as cursor:
+            # Önce session'ın bu kullanıcıya ait olduğunu kontrol et
+            sql = "SELECT session_id FROM chat_sessions WHERE session_id = %s AND user_id = %s"
+            cursor.execute(sql, (session_id, user_id))
+            if not cursor.fetchone():
+                return False
+            
+            # Önce mesajları sil
+            sql = "DELETE FROM chat_messages WHERE session_id = %s"
+            cursor.execute(sql, (session_id,))
+            
+            # Sonra session'ı sil
+            sql = "DELETE FROM chat_sessions WHERE session_id = %s"
+            cursor.execute(sql, (session_id,))
+            
+            conn.commit()
+            return True
+    except Exception as e:
+        print(f"Chat silme hatası: {e}")
+        return False
+    finally:
+        conn.close()
+
 # --------------------------- Ana LLM Çağrısı ---------------------------------
-async def ai_chat(messages, system_prompt, plan_type="free"):
+async def ai_chat(messages, system_prompt, plan_type="free", user_id=None, session_id=None):
     """
     Gemini + MCP ile sohbet (Plan bazlı model seçimi)
     """
@@ -271,6 +422,12 @@ async def ai_chat(messages, system_prompt, plan_type="free"):
         
         # Plan bazlı model seçimi
         model_name = "gemini-2.5-pro" if plan_type == "pro" else "gemini-1.5-pro"
+        
+        # Dinamik sistem prompt'u oluştur
+        if plan_type == "pro":
+            system_prompt = get_system_prompt_pro(user_id, session_id)
+        else:
+            system_prompt = get_system_prompt_free(user_id, session_id)
         
         # 1) MCP oturumunu aç → session otomatik keşif + araç çağrıları
         async with mcp_client:
@@ -489,6 +646,13 @@ async def chat_api():
         user_id = session['user_id']
         plan_type = session.get('plan_type', 'free')
         
+        # Dosya yolu takibi - kullanıcının son yüklediği dosya varsa al
+        current_file_path = None
+        if session.get('current_file'):
+            current_file_path = session['current_file']['path']
+            # Dosya yolunu kullandıktan sonra session'dan temizle
+            session.pop('current_file', None)
+        
         # Chat oturumu oluştur veya mevcut oturumu kullan
         if not session_id:
             chat_id, session_id = create_chat_session(user_id)
@@ -497,8 +661,8 @@ async def chat_api():
             if not is_valid_session(session_id, user_id):
                 return jsonify({'error': 'Geçersiz chat oturumu'}), 400
         
-        # Kullanıcı mesajını kaydet
-        save_chat_message(session_id, user_id, 'user', user_message)
+        # Kullanıcı mesajını kaydet (dosya yolu ile birlikte)
+        save_chat_message(session_id, user_id, 'user', user_message, current_file_path)
         
         # Önceki mesajları getir
         messages_data = get_chat_messages(session_id)
@@ -510,11 +674,11 @@ async def chat_api():
             })
         
         # AI'dan yanıt al
-        response = await ai_chat(messages, SYSTEM_PROMPT_FREE if plan_type == "free" else SYSTEM_PROMPT_PRO, plan_type)
+        response = await ai_chat(messages, "", plan_type, user_id, session_id)
         
         if response and response.strip():
-            # AI yanıtını kaydet
-            save_chat_message(session_id, user_id, 'assistant', response)
+            # AI yanıtını kaydet (AI yanıtında dosya yolu yok)
+            save_chat_message(session_id, user_id, 'assistant', response, None)
             
             return jsonify({
                 'response': response,
@@ -638,27 +802,28 @@ def upload_file():
             return jsonify({'success': False, 'error': 'Oturum açmanız gerekiyor'}), 401
         
         if 'file' not in request.files:
-            return jsonify({'success': False, 'error': 'Dosya seçilmedi'})
+            return jsonify({'success': False, 'error': 'Dosya seçilmedi'}), 400
         
         file = request.files['file']
         if file.filename == '':
-            return jsonify({'success': False, 'error': 'Dosya seçilmedi'})
+            return jsonify({'success': False, 'error': 'Dosya seçilmedi'}), 400
         
-        # Dosya türünü belirle
-        filename = file.filename.lower()
-        if filename.endswith('.pdf'):
-            file_type = 'PDF'
-        elif filename.endswith(('.mp3', '.wav', '.m4a')):
-            file_type = 'Audio'
-        elif filename.endswith(('.mp4', '.avi', '.mov', '.mkv', '.webm')):
-            file_type = 'Video'
-        elif filename.endswith(('.txt', '.doc', '.docx')):
-            file_type = 'Text'
-        else:
-            file_type = 'Unknown'
+        # Dosya türü kontrolü
+        allowed_extensions = {
+            'pdf': 'PDF',
+            'mp3': 'AUDIO', 'wav': 'AUDIO', 'm4a': 'AUDIO',
+            'mp4': 'VIDEO', 'avi': 'VIDEO', 'mov': 'VIDEO', 'mkv': 'VIDEO', 'webm': 'VIDEO',
+            'txt': 'TEXT', 'doc': 'DOCUMENT', 'docx': 'DOCUMENT'
+        }
+        
+        file_extension = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else ''
+        if file_extension not in allowed_extensions:
+            return jsonify({'success': False, 'error': 'Desteklenmeyen dosya türü'}), 400
+        
+        file_type = allowed_extensions[file_extension]
         
         # Dosyayı kaydet
-        upload_folder = 'uploads'
+        upload_folder = r'C:\mcpler\education_mcp\shared_uploads'
         if not os.path.exists(upload_folder):
             os.makedirs(upload_folder)
         
@@ -695,6 +860,33 @@ def clear_file():
     session.pop('current_file', None)
     return jsonify({'success': True})
 
+@app.route('/api/delete-chat/<session_id>', methods=['DELETE', 'GET'])
+def delete_chat(session_id):
+    """Chat'i sil"""
+    try:
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'error': 'Oturum açmanız gerekiyor'}), 401
+        
+        user_id = session['user_id']
+        
+        # Chat'i sil
+        success = delete_chat_session(session_id, user_id)
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Chat başarıyla silindi'
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Chat silinemedi veya bulunamadı'
+            }), 404
+            
+    except Exception as e:
+        print(f"Chat silme hatası: {e}")
+        return jsonify({'success': False, 'error': 'Bir hata oluştu'}), 500
+
 # --------------------------- WebSocket Events --------------------------------
 @socketio.on('connect')
 def handle_connect():
@@ -721,7 +913,16 @@ async def handle_message(data):
         if not user_message:
             emit('error', {'message': 'Mesaj boş olamaz'})
             return
-            
+        
+        # Dosya yolu takibi - kullanıcının son yüklediği dosya varsa al
+        current_file_path = None
+        if session.get('current_file'):
+            current_file_path = session['current_file']['path']
+            print(f"DEBUG: Current file path: {current_file_path}")
+            # Dosya yolunu kullandıktan sonra session'dan temizle
+            session.pop('current_file', None)
+            print("DEBUG: File path cleared from session")
+        
         # Kullanıcı mesajını hemen göster
         emit('user_message', {
             'message': user_message,
@@ -740,11 +941,16 @@ async def handle_message(data):
                 emit('error', {'message': 'Geçersiz chat oturumu'})
                 return
         
-        # Kullanıcı mesajını kaydet
-        save_chat_message(session_id, user_id, 'user', user_message)
+        # Kullanıcı mesajını kaydet (dosya yolu ile birlikte)
+        save_chat_message(session_id, user_id, 'user', user_message, current_file_path)
         
         # "Yazıyor..." durumu gönder
         emit('typing', {'status': True})
+        
+        # Tool durumunu belirle ve gönder
+        tool_status = determine_tool_status(user_message, current_file_path)
+        if tool_status:
+            emit('tool_status', tool_status)
         
         # Önceki mesajları getir
         messages_data = get_chat_messages(session_id)
@@ -756,14 +962,14 @@ async def handle_message(data):
             })
         
         # AI'dan yanıt al
-        response = await ai_chat(messages, SYSTEM_PROMPT_FREE if plan_type == "free" else SYSTEM_PROMPT_PRO, plan_type)
+        response = await ai_chat(messages, "", plan_type, user_id, session_id)
         
         # "Yazıyor..." durumunu kapat
         emit('typing', {'status': False})
         
         if response and response.strip():
-            # AI yanıtını kaydet ve gönder
-            save_chat_message(session_id, user_id, 'assistant', response)
+            # AI yanıtını kaydet ve gönder (AI yanıtında dosya yolu yok)
+            save_chat_message(session_id, user_id, 'assistant', response, None)
             
             emit('bot_message', {
                 'message': response,
@@ -777,6 +983,61 @@ async def handle_message(data):
         print(f"WebSocket Mesaj Hatası: {e}")
         emit('typing', {'status': False})
         emit('error', {'message': 'Bir hata oluştu'})
+
+def determine_tool_status(message, file_path):
+    """Mesaj ve dosya yoluna göre hangi tool'un kullanılacağını belirle"""
+    message_lower = message.lower()
+    
+    # Dosya türüne göre tool belirleme
+    if file_path:
+        file_extension = file_path.lower().split('.')[-1] if '.' in file_path else ''
+        
+        if file_extension == 'pdf':
+            return {
+                'tool': 'pdf_summarizer',
+                'status': 'PDF özetleniyor...',
+                'icon': 'fa-file-pdf'
+            }
+        elif file_extension in ['mp3', 'wav', 'm4a']:
+            return {
+                'tool': 'audio_transcriber',
+                'status': 'Ses dosyası işleniyor...',
+                'icon': 'fa-file-audio'
+            }
+        elif file_extension in ['mp4', 'avi', 'mov', 'mkv', 'webm']:
+            return {
+                'tool': 'video_summarizer',
+                'status': 'Video özetleniyor...',
+                'icon': 'fa-file-video'
+            }
+    
+    # Mesaj içeriğine göre tool belirleme
+    if any(word in message_lower for word in ['quiz', 'soru', 'test']):
+        return {
+            'tool': 'quiz_generator',
+            'status': 'Quiz oluşturuluyor...',
+            'icon': 'fa-question-circle'
+        }
+    elif any(word in message_lower for word in ['özet', 'summary']):
+        if 'video' in message_lower:
+            return {
+                'tool': 'video_summarizer',
+                'status': 'Video kapsamlı özetleniyor...',
+                'icon': 'fa-file-video'
+            }
+        elif 'pdf' in message_lower or 'doküman' in message_lower:
+            return {
+                'tool': 'pdf_summarizer',
+                'status': 'PDF kapsamlı özetleniyor...',
+                'icon': 'fa-file-pdf'
+            }
+    
+    # Varsayılan durum
+    return {
+        'tool': 'ai_chat',
+        'status': 'AI düşünüyor...',
+        'icon': 'fa-brain'
+    }
 
 @socketio.on('clear_chat')
 def handle_clear_chat():
